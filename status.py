@@ -1,5 +1,12 @@
 #!/usr/bin/python3
-import subprocess, os
+import subprocess, os, sys
+argv = sys.argv
+
+def checkArgv(argv,condidition):
+    for x in range(0,len(argv)):
+        if argv[x] == condidition:
+            return True
+    return False
 
 def applyBlacklist(command, blacklist):
     if len(blacklist) == 0:
@@ -11,7 +18,7 @@ def applyBlacklist(command, blacklist):
         command += " -e {}".format(blacklist[x])
     return command
 
-def checkSystemd():
+def checkSystemd(argv):
     formattedOutput = 'The following issues were found with systemd\n\n'
     systemctl,errors = [],0
     blacklist = []
@@ -28,9 +35,10 @@ def checkSystemd():
     
     if errors >= 1:
         print(formattedOutput)
-        os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput))
+        if checkArgv(argv,"--nogui") == False:
+            os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput))
 
-def diskUsage():
+def diskUsage(argv):
     formattedOutput = 'Low diskspace detected\n\n'
     diskSpace,errors = [],0
     threshold = 85 #Percent threshold for disk space usage
@@ -52,7 +60,15 @@ def diskUsage():
                 
     if errors >= 1:
         print(formattedOutput)
-        os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput))
-    
-checkSystemd()
-diskUsage()
+        if checkArgv(argv,"--nogui") == False:
+            os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput))
+
+if checkArgv(argv,"-h"):
+    print(
+"""{}
+    -h --help      Prints the help message
+    --nogui        Disables the GUI output and only prints to STDOUT""".format(argv[0]))
+    sys.exit()
+
+checkSystemd(argv)
+diskUsage(argv)
