@@ -9,8 +9,9 @@ def findArgv(argv,condidtion): # Find the position of something in argv and retu
 
 def checkArgv(argv,condidition): # Will check to see if a argument has been passed
     for x in range(0,len(argv)):
-        if argv[x] == condidition:
-            return True
+        for i in range(0,len(condidition)):
+            if argv[x] == condidition[i]:
+                return True
     return False
 
 def applyBlacklist(command, blacklist): # Apply a grep based blacklist to a command
@@ -28,7 +29,7 @@ def checkSystemd(argv): # Checks for any systemd errors and reports them
     systemctl,errors = [],0
     blacklist = []
     
-    if checkArgv(argv,"--sysBlacklist") == True: # Check to see if a blacklist needs to be applied
+    if checkArgv(argv,["--sysBlacklist"]) == True: # Check to see if a blacklist needs to be applied
         for x in range(0,len(argv[findArgv(argv,"--sysBlacklist") + 1].split(","))):
             blacklist.append(argv[findArgv(argv,"--sysBlacklist") + 1].split(",")[x])
     
@@ -44,7 +45,7 @@ def checkSystemd(argv): # Checks for any systemd errors and reports them
     
     if errors >= 1: # Checks if any errors were even found before attempting to display them
         print(formattedOutput)
-        if checkArgv(argv,"--nogui") == False: # Check if a GUI based prompt is supposed to be run
+        if checkArgv(argv,["--nogui"]) == False: # Check if a GUI based prompt is supposed to be run
             os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput)) # Display GUI prompt
 
 def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
@@ -53,11 +54,11 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
     blacklist = []
     threshold = 85 # Default threshold level
  
-    if checkArgv(argv,"--diskBlacklist") == True: # Check if blacklist argument has been specified
+    if checkArgv(argv,["--diskBlacklist"]) == True: # Check if blacklist argument has been specified
         for x in range(0,len(argv[findArgv(argv,"--diskBlacklist") + 1].split(","))):
             blacklist.append(argv[findArgv(argv,"--diskBlacklist") + 1].split(",")[x])
     
-    if checkArgv(argv,"--threshold") == True: # Check if we need to adjust the threshold
+    if checkArgv(argv,["--threshold"]) == True: # Check if we need to adjust the threshold
         threshold = int(argv[findArgv(argv,"--threshold") + 1])
     
     dfOutput = subprocess.getoutput(applyBlacklist("df -h",blacklist)).split('\n') # Get the output of df and store as a newline separated list
@@ -76,13 +77,13 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
                 
     if errors >= 1: # Check if there are any errors to even report
         print(formattedOutput)
-        if checkArgv(argv,"--nogui") == False: # see if any errors even need to be displayed
+        if checkArgv(argv,["--nogui"]) == False: # see if any errors even need to be displayed
             os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput)) # display errors as a gui
 
 ########################################################################################
 # Main Program
 
-if checkArgv(argv,"-h") == True or checkArgv(argv,"--help") == True: # Check if we need to display the help screen
+if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the help screen
     print(
 """{}
     -h --help               Prints this help message
