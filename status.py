@@ -9,7 +9,7 @@ def displayError(argv,formattedOutput,errors=0,skipError=False):
             if checkArgv(argv,["--nogui"]) == False: # Check if a GUI based prompt is supposed to be run
                 os.system("zenity --error --ellipsize --text='{}' 2>/dev/null".format(formattedOutput)) # Display GUI prompt
     except Exception as e:  
-        print(e)
+        print("displayError()\n{}".format(e))
         sys.exit()       
                 
 def findArgv(argv,condidtion): # Find the position of something in argv and returns the position
@@ -18,7 +18,7 @@ def findArgv(argv,condidtion): # Find the position of something in argv and retu
             if argv[x] == condidtion:
                 return x
     except Exception as e:  
-        print(e)
+        print("findArgv()\n{}".format(e))
         sys.exit()
 
 def checkArgv(argv,condidition): # Will check to see if a argument has been passed
@@ -29,7 +29,7 @@ def checkArgv(argv,condidition): # Will check to see if a argument has been pass
                     return True
         return False
     except Exception as e:  
-        print(e)
+        print("checkArgv()\n{}".format(e))
         sys.exit()
 
 def applyBlacklist(command, blacklist): # Apply a grep based blacklist to a command
@@ -43,7 +43,7 @@ def applyBlacklist(command, blacklist): # Apply a grep based blacklist to a comm
             command += " -e {}".format(blacklist[x])
         return command
     except Exception as e:  
-        print(e)
+        print("applyBlacklist()\n{}".format(e))
         sys.exit()
 
 def checkSystemd(argv): # Checks for any systemd errors and reports them
@@ -68,7 +68,7 @@ def checkSystemd(argv): # Checks for any systemd errors and reports them
         
         displayError(argv,formattedOutput,errors)
     except Exception as e:  
-        print(e)
+        print("checkSystemd()\n{}".format(e))
         sys.exit()
 
 def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
@@ -82,8 +82,8 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
             for x in range(0,len(argv[findArgv(argv,"--diskBlacklist") + 1].split(","))):
                 blacklist.append(argv[findArgv(argv,"--diskBlacklist") + 1].split(",")[x])
         
-        if checkArgv(argv,["--threshold"]) == True: # Check if we need to adjust the threshold
-            threshold = int(argv[findArgv(argv,"--threshold") + 1])
+        if checkArgv(argv,["--diskThreshold"]) == True: # Check if we need to adjust the threshold
+            threshold = int(argv[findArgv(argv,"--diskThreshold") + 1])
         
         dfOutput = subprocess.getoutput(applyBlacklist("df -h",blacklist)).split('\n') # Get the output of df and store as a newline separated list
 
@@ -101,7 +101,7 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
                     
         displayError(argv,formattedOutput,errors)
     except Exception as e:  
-        print(e)
+        print("diskUsage()\n{}".format(e))
         sys.exit()
 
 def checkTrash(argv):
@@ -110,7 +110,7 @@ def checkTrash(argv):
         if subprocess.getoutput("$(which dir) $HOME/.local/share/Trash/files").split(' ') != ['']:
             displayError(argv,formattedOutput,skipError=True)
     except Exception as e:  
-        print(e)
+        print("checkTrash()\n{}".format(e))
         sys.exit()
     
 def checkEntropy(argv):
@@ -125,7 +125,7 @@ def checkEntropy(argv):
         if entropy <= threshold:
             displayError(argv,formattedOutput,skipError=True)
     except Exception as e:
-        print(e)
+        print("displayEntropy()\n{}".format(e))
         sys.exit()
 ########################################################################################
 # Main Program
@@ -135,7 +135,7 @@ if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the he
 """{}
     -h --help               Prints this help message
     --nogui                 Disables the GUI output and only prints to STDOUT
-    --threshold             Overrides the threshold value for disk space usage
+    --diskThreshold             Overrides the threshold value for disk space usage
     --diskBlacklist         Blacklists certain strings from disk usage checks. Values are comma separated
     --sysBlacklist          Blacklists certain strings from systemd checks. Values are comma separated
     --enableTrash           Enables checking Trash to see if its empty
