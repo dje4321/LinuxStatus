@@ -15,8 +15,9 @@ def displayError(argv,formattedOutput,errors=0,skipError=False):
 def findArgv(argv,condidtion): # Find the position of something in argv and returns the position
     try:
         for x in range(0,len(argv)):
-            if argv[x] == condidtion:
-                return x
+            for i in range(0,len(condidtion)):
+                if argv[x] == condidtion[i]:
+                    return x
     except Exception as e:  
         print("findArgv()\n{}".format(e))
         sys.exit()
@@ -52,9 +53,9 @@ def checkSystemd(argv): # Checks for any systemd errors and reports them
         systemctl,errors = [],0
         blacklist = []
         
-        if checkArgv(argv,["--sysBlacklist"]) == True: # Check to see if a blacklist needs to be applied
-            for x in range(0,len(argv[findArgv(argv,"--sysBlacklist") + 1].split(","))):
-                blacklist.append(argv[findArgv(argv,"--sysBlacklist") + 1].split(",")[x])
+        if checkArgv(argv,["--sysBlacklist","-sb"]) == True: # Check to see if a blacklist needs to be applied
+            for x in range(0,len(argv[findArgv(argv,["--sysBlacklist","-sb"]) + 1].split(","))):
+                blacklist.append(argv[findArgv(argv,["--sysBlacklist","-sb"]) + 1].split(",")[x])
         
         systemctlOutput = subprocess.getoutput(applyBlacklist("systemctl",blacklist)).split('\n') # Runs systemctl with the optional blacklist and stores the output as a newline separted list
 
@@ -78,12 +79,12 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
         blacklist = []
         threshold = 85 # Default threshold level
      
-        if checkArgv(argv,["--diskBlacklist"]) == True: # Check if blacklist argument has been specified
-            for x in range(0,len(argv[findArgv(argv,"--diskBlacklist") + 1].split(","))):
-                blacklist.append(argv[findArgv(argv,"--diskBlacklist") + 1].split(",")[x])
+        if checkArgv(argv,["--diskBlacklist","-db"]) == True: # Check if blacklist argument has been specified
+            for x in range(0,len(argv[findArgv(argv,["--diskBlacklist","-db"]) + 1].split(","))):
+                blacklist.append(argv[findArgv(argv,["--diskBlacklist","-db"]) + 1].split(",")[x])
         
-        if checkArgv(argv,["--diskThreshold"]) == True: # Check if we need to adjust the threshold
-            threshold = int(argv[findArgv(argv,"--diskThreshold") + 1])
+        if checkArgv(argv,["--diskThreshold","-dt"]) == True: # Check if we need to adjust the threshold
+            threshold = int(argv[findArgv(argv,["--diskThreshold","-dt"]) + 1])
         
         dfOutput = subprocess.getoutput(applyBlacklist("df -h",blacklist)).split('\n') # Get the output of df and store as a newline separated list
 
@@ -117,8 +118,8 @@ def checkEntropy(argv):
     try:
         threshold = 100
         entropy = int(subprocess.getoutput("cat /proc/sys/kernel/random/entropy_avail"))
-        if checkArgv(argv,["--entropyThreshold"]) == True:
-            threshold = int(argv[findArgv(argv,"--entropyThreshold") + 1])
+        if checkArgv(argv,["--entropyThreshold","-et"]) == True:
+            threshold = int(argv[findArgv(argv,["--entropyThreshold","-et"]) + 1])
             
         formattedOutput = "Entropy is below {}\n You should not do anything cryptographicly intensive".format(threshold)
         
@@ -133,21 +134,21 @@ def checkEntropy(argv):
 if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the help screen
     print(
 """{}
-    -h --help               Prints this help message
-    --nogui                 Disables the GUI output and only prints to STDOUT
-    --diskThreshold             Overrides the threshold value for disk space usage
-    --diskBlacklist         Blacklists certain strings from disk usage checks. Values are comma separated
-    --sysBlacklist          Blacklists certain strings from systemd checks. Values are comma separated
-    --enableTrash           Enables checking Trash to see if its empty
-    --enableEntropy          Checks to see if entropy is too low
-    --entropyThreshold      threshold for total entropy""".format(argv[0]))
+    -h --help                  Prints this help message
+    --nogui                    Disables the GUI output and only prints to STDOUT
+    --diskThreshold -dt        Overrides the threshold value for disk space usage
+    --diskBlacklist -db        Blacklists certain strings from disk usage checks. Values are comma separated
+    --sysBlacklist  -sb        Blacklists certain strings from systemd checks. Values are comma separated
+    --enableTrash   -et        Enables checking Trash to see if its empty
+    --enableEntropy -ee        Checks to see if entropy is too low
+    --entropyThreshold -et     Threshold for total entropy""".format(argv[0]))
     sys.exit()
 
 checkSystemd(argv) # Check systemd for errors
 diskUsage(argv) # Check for high disk usage
 
-if checkArgv(argv,["--enableTrash"]) == True:
+if checkArgv(argv,["--enableTrash","-et"]) == True:
     checkTrash(argv)
 
-if checkArgv(argv,["--enableEntropy"]) == True:
+if checkArgv(argv,["--enableEntropy","-ee"]) == True:
     checkEntropy(argv)
