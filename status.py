@@ -138,7 +138,7 @@ if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the he
     --threshold             Overrides the threshold value for disk space usage
     --diskBlacklist         Blacklists certain strings from disk usage checks. Values are comma separated
     --sysBlacklist          Blacklists certain strings from systemd checks. Values are comma separated
-    --enableTrash          Enables checking Trash to see if its empty
+    --enableTrash           Enables checking Trash to see if its empty
     --checkEntropy          Checks to see if entropy is too low
     --entropyThreshold      threshold for total entropy""".format(argv[0]))
     sys.exit()
