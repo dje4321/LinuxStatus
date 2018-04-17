@@ -107,12 +107,26 @@ def diskUsage(argv): # Checks if any mounted devices have exceeded a threshold
 def checkTrash(argv):
     try:
         formattedOutput = 'Trash is not empty\n'
-        if subprocess.getoutput("$(which dir) ~/.local/share/Trash/files").split(' ') != ['']:
+        if subprocess.getoutput("$(which dir) $HOME/.local/share/Trash/files").split(' ') != ['']:
             displayError(argv,formattedOutput,skipError=True)
     except Exception as e:  
         print(e)
         sys.exit()
     
+def checkEntropy(argv):
+    try:
+        threshold = 500
+        entropy = int(subprocess.getoutput("cat /proc/sys/kernel/random/entropy_avail"))
+        if checkArgv(argv,["--entropyThreshold"]) == True:
+            threshold = int(argv[findArgv(argv,"--entropyThreshold") + 1])
+            
+        formattedOutput = "Entropy is below {}\n You should not do anything cryptographicly intensive".format(threshold)
+        
+        if entropy <= threshold:
+            displayError(argv,formattedOutput,skipError=True)
+    except Exception as e:
+        print(e)
+        sys.exit()
 ########################################################################################
 # Main Program
 
@@ -124,11 +138,15 @@ if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the he
     --threshold             Overrides the threshold value for disk space usage
     --diskBlacklist         Blacklists certain strings from disk usage checks. Values are comma separated
     --sysBlacklist          Blacklists certain strings from systemd checks. Values are comma separated
-    --enable-trash          Enables checking Trash to see if its empty""".format(argv[0]))
+    --enableTrash          Enables checking Trash to see if its empty
+    --checkEntropy          Checks to see if entropy is too low
+    --entropyThreshold      threshold for total entropy""".format(argv[0]))
     sys.exit()
 
 checkSystemd(argv) # Check systemd for errors
 diskUsage(argv) # Check for high disk usage
-if checkArgv(argv,["--enable-trash"]) == True:
+if checkArgv(argv,["--enableTrash"]) == True:
     checkTrash(argv)
-    
+
+if checkArgv(argv,["--enableEntropy"]) == True:
+    checkEntropy(argv)
