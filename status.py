@@ -115,7 +115,7 @@ def checkTrash(argv):
     
 def checkEntropy(argv):
     try:
-        threshold = 500
+        threshold = 100
         entropy = int(subprocess.getoutput("cat /proc/sys/kernel/random/entropy_avail"))
         if checkArgv(argv,["--entropyThreshold"]) == True:
             threshold = int(argv[findArgv(argv,"--entropyThreshold") + 1])
@@ -145,6 +145,7 @@ if checkArgv(argv,["-h","--help"]) == True: # Check if we need to display the he
 
 checkSystemd(argv) # Check systemd for errors
 diskUsage(argv) # Check for high disk usage
+
 if checkArgv(argv,["--enableTrash"]) == True:
     checkTrash(argv)
 
