@@ -23,6 +23,7 @@ help = """{}
 class Configuration:
 
     def __init__(self,file):
+        file = os.path.realpath(file)
         if os.path.exists(os.path.abspath(file)) != True:
             if os.path.exists(os.path.dirname(file)) != True:
                 os.makedirs(os.path.dirname(file))
@@ -53,7 +54,7 @@ def typeCast(var):
     if var == "True": # Check for bools
         return True
     if var == "False":
-        return False
+        return Falsef
     if var.isnumeric == True: # See if its a number
         return int(var)
 
