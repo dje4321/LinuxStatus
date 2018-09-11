@@ -9,16 +9,26 @@ default = {
 "systemd":True,
 "disk":True,
 "entropyThreshold":100,
-"systemdBlacklist":"",
-"diskBlacklist":"",
+"systemdBlacklist":[],
+"diskBlacklist":[]
+}
+
+exampleConfig = {
+"nogui":False,
+"trash":True,
+"entropy":True,
+"systemd":True,
+"disk":True,
+"entropyThreshold":100,
+"systemdBlacklist":["lvm"],
+"diskBlacklist":["tmpfs","/var"]
 }
 
 help = """{}
 
+-e      Prints a example config
 -h      Displays this help message
--c      Specifies a config to load. If it doesnt exists a default one will be created""".format(
-    argv[0]
-)
+-c      Specifies a config to load. If it doesnt exists a default one will be created""".format(argv[0])
 
 class Configuration:
 
@@ -32,18 +42,11 @@ class Configuration:
             fd.close()
 
     def __write__(self,fd,data):
-        if type(data) == dict: # See if were writing a dictionary and if True then split it up for readability.
-            _data = str(data).split(",")
-            for i in _data:
-                fd.write(str(i) + "\n")
-        else: # if its not a dictionary then just treat it as a string
-            fd.write(str(data) + "\n")
+        fd.write(str(data) + "\n")
 
     def read(self, file):
-
         fd = open(os.path.abspath(file), "r")
-        config = fd.read().replace("\n", ",") #Commas are replaced by newlines for readability
-        config = config[:-1] #Remove the trailing comma
+        config = fd.read()
         fd.close()
 
         return eval(config)
@@ -54,7 +57,7 @@ def typeCast(var):
     if var == "True": # Check for bools
         return True
     if var == "False":
-        return Falsef
+        return False
     if var.isnumeric == True: # See if its a number
         return int(var)
 
@@ -77,6 +80,10 @@ def testArgv(arg):
 
 def main(config):
     function.checkSystemd(config)
+
+if testArgv("-e") == True:
+    print(exampleConfig)
+    exit()
 
 if testArgv("-h") == True:
     print(help)
