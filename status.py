@@ -9,6 +9,7 @@ default = {
 "systemd":True,
 "disk":True,
 "entropyThreshold":100,
+"diskThreshold":80,
 "systemdBlacklist":[],
 "diskBlacklist":[]
 }
@@ -80,6 +81,7 @@ def testArgv(arg):
 
 def main(config):
     function.checkSystemd(config)
+    function.checkDisk(config)
 
 if testArgv("-e") == True:
     print(exampleConfig)
