@@ -16,16 +16,17 @@ def checkSystemd(config):
             # print(repr(x))
             systemctl.append(x.split(" ")[1] + " has failed")
 
+    systemctlError = systemctl
     if config["systemdBlacklist"] != []: # Apply the blacklist
         counter = -1
         counter += 1
-        for i in blacklist:
-            for a in systemctl:
-                if a.count(i) != 0:
-                    systemctl.pop(counter)
+        for _blacklist in blacklist:
+            for _systemctl in systemctl:
+                if _systemctl.count(_blacklist) > 0:
+                    systemctlError.pop(counter)
 
-    for a in systemctl:
-        print(a)
+    for b in systemctlError:
+        print(b)
 
 def checkDisk(config):
 
@@ -41,5 +42,14 @@ def checkDisk(config):
                 if int(x.strip("%")) >= config["diskThreshold"]:
                     diskUsage.append(_output[-1] + " is at " + str(x) + " disk usage")
 
-    for a in diskUsage:
-        print(a)
+    diskUsageError = diskUsage
+    if config["diskBlacklist"] != []: # Apply the blacklist
+        counter = -1
+        counter += 1
+        for _blacklist in blacklist:
+            for _diskUsage in diskUsage:
+                if _diskUsage.count(_blacklist) > 0:
+                    diskUsageError.pop(counter)
+
+    for b in diskUsageError:
+        print(b)
