@@ -7,7 +7,7 @@ if __name__ == "__main__":
 def checkSystemd(config):
 
     print("[SYSTEMD]")
-    systemctl = []
+    systemctl,systemctlError = [],[]
     blacklist = config["systemdBlacklist"]
     output = subprocess.getoutput("systemctl list-units").splitlines() #Get a list of all systemd units
 
@@ -16,14 +16,13 @@ def checkSystemd(config):
             # print(repr(x))
             systemctl.append(x.split(" ")[1] + " has failed")
 
-    systemctlError = systemctl
     if config["systemdBlacklist"] != []: # Apply the blacklist
         counter = -1
         counter += 1
         for _blacklist in blacklist:
             for _systemctl in systemctl:
-                if _systemctl.count(_blacklist) > 0:
-                    systemctlError.pop(counter)
+                if _systemctl.count(_blacklist) == 0:
+                    systemctlError.append(_systemctl)
 
     for b in systemctlError:
         print(b)
@@ -31,7 +30,7 @@ def checkSystemd(config):
 def checkDisk(config):
 
     print("[DISK USAGE]")
-    diskUsage = []
+    diskUsage, diskUsageError = [],[]
     blacklist = config["diskBlacklist"]
     output = subprocess.getoutput("df -h").splitlines()
 
@@ -42,14 +41,13 @@ def checkDisk(config):
                 if int(x.strip("%")) >= config["diskThreshold"]:
                     diskUsage.append(_output[-1] + " is at " + str(x) + " disk usage")
 
-    diskUsageError = diskUsage
     if config["diskBlacklist"] != []: # Apply the blacklist
         counter = -1
         counter += 1
         for _blacklist in blacklist:
             for _diskUsage in diskUsage:
-                if _diskUsage.count(_blacklist) > 0:
-                    diskUsageError.pop(counter)
+                if _diskUsage.count(_blacklist) == 0:
+                    diskUsageError.append(_diskUsage)
 
     for b in diskUsageError:
         print(b)
